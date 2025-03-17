@@ -1,8 +1,0 @@
-//////////////////////////////////////////////////////// Implémentation de la classe ////////////////////////////////////////////////
-
-#include <iostream>
-#include <vector>
-#include <cmath>
-
-#include "mx3_board.hpp"
-#include "main_mx3.c"

@@ -2,17 +2,20 @@
 #ifndef MX3BOARD
 #define MX3BOARD
 
+#include "Reg8.hpp"
 #include "mx3board_regs.h"
-
+#include <stdio.h>
+#include <termios.h> // to access tty configuration
+#include <unistd.h>  // write(), read(), close()
+#include <fcntl.h>   // Contains file controls like O_RDWR
 
 class MX3board
 {
 private:
-    int tty
-
+    int tty;
 public:
     //Constructeurs et destructeurs
-    MX3board(const char* filename);
+    MX3board(char* filename);
     ~MX3board();
 
     //surcharges
@@ -22,7 +25,7 @@ public:
 
 
 //Constructeur
-MX3board::MX3board(const char* filename)
+MX3board::MX3board(char* filename)
 {
     tty = board_open(filename);
 }
@@ -34,16 +37,17 @@ MX3board::~MX3board()
 }
 
 //Surcharge lecture
-unsigned char operator[](unsigned char addr) const {
+unsigned char MX3board::operator[](unsigned char addr) const {
     board_d_read(tty, addr);
 }
 
 //Surcharge écriture
-unsigned char& operator[](unsigned char addr) {
+unsigned char& MX3board::operator[](unsigned char addr) {
     static unsigned char data = 0;  //variable est utilisée pour stocker temporairement la donnée
     board_d_write(tty, addr, data);
 }
 
+int last_error = 0;
 
 int board_open(char * filename) {
     // opens a TTY (UART) connection to the board
@@ -146,3 +150,5 @@ void board_d_write(int tty, unsigned char addr, unsigned char data) {
     // actually send command
     write(tty, gen, 3);
 }
+
+#endif

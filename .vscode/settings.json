@@ -1,0 +1,5 @@
+{
+    "files.associations": {
+        "mx3board_regs.h": "c"
+    }
+}
