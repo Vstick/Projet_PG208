@@ -37,14 +37,8 @@ MX3board::~MX3board()
 }
 
 //Surcharge lecture
-unsigned char MX3board::operator[](unsigned char addr) const {
-    board_d_read(tty, addr);
-}
-
-//Surcharge écriture
-unsigned char& MX3board::operator[](unsigned char addr) {
-    static unsigned char data = 0;  //variable est utilisée pour stocker temporairement la donnée
-    board_d_write(tty, addr, data);
+Reg8 MX3board::operator[](unsigned char addr) const {
+    return Reg8(this, addr);
 }
 
 int last_error = 0;
