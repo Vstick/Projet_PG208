@@ -1,5 +1,6 @@
-#include "mx3_board.hpp"
 #include <iostream>
+#include "mx3_board.hpp"   
+
 
 int main(int argc, char *argv[]){
     if (argc<2) {
@@ -9,5 +10,5 @@ int main(int argc, char *argv[]){
 
     MX3board board {argv[1]};
     
-
+    return 0;
 }
