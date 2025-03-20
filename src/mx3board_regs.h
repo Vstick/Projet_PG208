@@ -43,9 +43,9 @@
 
 
 //Bit definitions for status register
-#define MX3BIT_STATUS_AUD_EN    0
-#define MX3BIT_STATUS_AUD_FREQ  1
-#define MX3BIT_STATUS_7SEG_MODE 2
+#define MX3BIT_STATUS_AUD_EN    0x01
+#define MX3BIT_STATUS_AUD_FREQ  0x02
+#define MX3BIT_STATUS_7SEG_MODE 0x0C
 
 
 //Command values
