@@ -66,48 +66,6 @@ int board_open(const char * filename) {
     return tty;
 }
 
-void board_d_write(int tty, unsigned char addr, unsigned char data) {
-    // write value 'data' at address 'addr'
-
-    // prepare command
-    unsigned char gen[3];
-    gen[0] = MX3CMD_WR1;
-    gen[1] = addr;
-    gen[2] = data;
-
-    // actually send command
-    write(tty, gen, 3);
-}
-
-unsigned char board_d_read(int tty, unsigned char addr) {
-    // read (and return) value stored at address 'addr'
-    // if data is not received, simply returns 0, and set the global variable
-    // 'last_error' to -1. to catch this error, user must clear 'last_error'
-    // prior calling this function, then check 'last_error' value
-
-    // this behavior is intentionnally not comfortable, you may provide
-    // your own C++ specific behavior (or not)
-
-    // prepare command
-    unsigned char gen[2];
-    gen[0] = MX3CMD_RD1;
-    gen[1] = addr;
-
-    // actually send command
-    write(tty, gen, 2);
-
-    // retreive data from board (1 byte)
-    if (!read(tty, gen, 1)) {
-        // read returned 0 (no data received)
-        printf("No answer from board\n");
-        // last_error = -1;
-        return 0;
-    }
-    return gen[0];
-}
-
-
-
 // int main(int argc, char *argv[]) {
 //     // check that we received the filename of the tty connection
 //     if (argc<2) {

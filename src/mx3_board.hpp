@@ -8,7 +8,6 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-#include <chrono>  // Pour std::chrono::milliseconds
 
 class Reg8;
 class LCD;
@@ -58,7 +57,7 @@ private:
 
 public:
     LCD();
-    void write(const std::string& message);
+    void writeLCD(const std::string& message);
     void next();
 
     // Affichage du message sur le LCD via les registres
@@ -78,7 +77,8 @@ public:
 
     // Gestion de la FIFO
     uint16_t samplesInFIFO();  
-    void writeSample(uint8_t sample);
+    uint8_t writeSample(std::ifstream& file);
+    void writeFIFO(uint16_t size, std::ifstream& file);
 
     // Lecture d'un fichier audio
     Aux& operator<<(const std::string& filename);

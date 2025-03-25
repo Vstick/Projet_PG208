@@ -13,7 +13,5 @@
 
 void board_close(int tty);
 int board_open(const char* filename);
-void board_d_write(int tty, unsigned char addr, unsigned char value);
-unsigned char board_d_read(int tty, unsigned char addr);
 
 #endif // COMMON_MX3_H
