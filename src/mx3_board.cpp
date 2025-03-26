@@ -28,6 +28,7 @@ void MX3board::writeEXT(unsigned char addr, char value) {
 }
 
 MX3board& MX3board::operator<<(const std::string& message) {
+    std::cout << "Pk tu es la" << std::endl;
     lcd->writeLCD(message);
     lcd->display(*this);
     lcd->next();
@@ -35,6 +36,7 @@ MX3board& MX3board::operator<<(const std::string& message) {
 }
 
 Aux& MX3board::getSound() {
+    std::cout << "Appel de getSound()" << std::endl;
     return *sound;
 }
 
@@ -156,11 +158,17 @@ uint8_t Aux::writeSample(std::ifstream& file) {
 }
 
 void Aux::writeFIFO(uint16_t size, std::ifstream& file){
-    while(size != 0){
-        unsigned char gen[255];
-        gen[0] = MX3CMD_WR_FF;
-        gen[1] = MX3ADDR_SND_WFIFO;
-        gen[2] = size;
+    uint16_t cnt{0};
+    
+    unsigned char gen[255];
+    gen[0] = MX3CMD_WR_FF;
+    gen[1] = MX3ADDR_SND_WFIFO;
+    gen[2] = 252;
+
+    unsigned char nop[1];
+    nop[0] = MX3CMD_NOP;
+    // std::cout << "debut du chargement de la musique" << std::endl;
+    while(size >= cnt){
         for(int i{3}; i<255; i++){
             if(file.eof()){
                 return;
@@ -170,19 +178,29 @@ void Aux::writeFIFO(uint16_t size, std::ifstream& file){
 
         // actually send command
         write(board->tty, gen, 255);
-        size -= 255;
+        cnt += 255;
+        // for(int i{0}; i<256; i++){    
+        //     write(board->tty, nop, 1);
+        // }
     }
+    // std::cout << "fin du chargement de la musique " << samplesInFIFO() << std::endl;
 }
 
 
 Aux& Aux::operator<<(const std::string& filename) {
     std::ifstream file(filename, std::ios::binary);
+    // std::cout << "Je charge tkt" << std::endl;
+
     if (!file.is_open()) {
-        throw std::runtime_error("Erreur : Impossible d'ouvrir le fichier audio");
+        std::cout << "Erreur : Impossible d'ouvrir le fichier audio" << std::endl;
+        // throw std::runtime_error("Erreur : Impossible d'ouvrir le fichier audio");
     }
+
+    // std::cout << "Ca arrive tkt" << std::endl;
     writeFIFO(64000, file);
     enable(true);
-    while(file.eof()){
+    while(!file.eof()){
+        // std::cout << "Le fic est vide ?" << std::endl;
         if(samplesInFIFO() <= 32000){
             writeFIFO(32000, file);
         }
@@ -190,4 +208,8 @@ Aux& Aux::operator<<(const std::string& filename) {
     while(samplesInFIFO() > 0);
     enable(false); // Désactivation du son à la fin
     return *this;
+}
+
+Aux& Aux::operator<<(const char* filename) {
+    return *this << std::string(filename);
 }

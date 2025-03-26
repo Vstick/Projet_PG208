@@ -82,6 +82,7 @@ public:
 
     // Lecture d'un fichier audio
     Aux& operator<<(const std::string& filename);
+    Aux& operator<<(const char* filename);
 };
 
 #endif // MX3BOARD_HPP

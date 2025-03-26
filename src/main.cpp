@@ -21,16 +21,8 @@ int main(int argc, char *argv[]){
         wait(1000);
         brd << "Je suis heureux d'aller en cours";
         wait(1000);
-        // brd << "voici la musique";
-        // try
-        // {
-        //     brd.getSound() << "./song/soupe.txt";
-        // }
-        // catch(const std::exception& e)
-        // {
-        //     std::cerr << e.what() << '\n';
-        // }
-              
+        brd << "voici la musique";
+        brd.getSound() << "./song/chiwawa.txt";              
 
         std::cout << "Attente de 10 seconde..." << std::endl;
         wait(10000);
