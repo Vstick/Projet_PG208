@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <thread>
 
 class Reg8;
 class LCD;
@@ -67,6 +68,8 @@ public:
 class Aux {
 private:
     MX3board* board;
+    bool stopMusic;
+    std::thread musicThread;
 
 public:
     Aux(MX3board* brd);
@@ -79,6 +82,8 @@ public:
     uint16_t samplesInFIFO();  
     uint8_t writeSample(std::ifstream& file);
     void writeFIFO(uint16_t size, std::ifstream& file);
+    void play(const std::string& filename);
+    void stop();
 
     // Lecture d'un fichier audio
     Aux& operator<<(const std::string& filename);

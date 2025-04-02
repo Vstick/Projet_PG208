@@ -7,7 +7,6 @@
 
 MX3board::MX3board(const char* filename) {
     tty = board_open(filename);
-    std:: cout << "tty : " << tty << std::endl;
     sound = new Aux(this);
     lcd = new LCD();
     sound->setFreq(false);
@@ -28,7 +27,6 @@ void MX3board::writeEXT(unsigned char addr, char value) {
 }
 
 MX3board& MX3board::operator<<(const std::string& message) {
-    std::cout << "Pk tu es la" << std::endl;
     lcd->writeLCD(message);
     lcd->display(*this);
     lcd->next();
@@ -36,7 +34,6 @@ MX3board& MX3board::operator<<(const std::string& message) {
 }
 
 Aux& MX3board::getSound() {
-    std::cout << "Appel de getSound()" << std::endl;
     return *sound;
 }
 
@@ -133,9 +130,9 @@ Aux::~Aux() {}
 
 void Aux::enable(bool state) {
     if (state)
-        board->writeEXT(MX3ADDR_STATUS, MX3BIT_STATUS_AUD_EN | (*board)[MX3ADDR_STATUS]);
+        (*board)[MX3ADDR_STATUS] = MX3BIT_STATUS_AUD_EN | (*board)[MX3ADDR_STATUS];
     else
-        board->writeEXT(MX3ADDR_STATUS, ~MX3BIT_STATUS_AUD_EN & (*board)[MX3ADDR_STATUS]);
+        (*board)[MX3ADDR_STATUS] = ~MX3BIT_STATUS_AUD_EN & (*board)[MX3ADDR_STATUS];
 }
 
 void Aux::setFreq(bool high) {
@@ -165,9 +162,6 @@ void Aux::writeFIFO(uint16_t size, std::ifstream& file){
     gen[1] = MX3ADDR_SND_WFIFO;
     gen[2] = 252;
 
-    unsigned char nop[1];
-    nop[0] = MX3CMD_NOP;
-    // std::cout << "debut du chargement de la musique" << std::endl;
     while(size >= cnt){
         for(int i{3}; i<255; i++){
             if(file.eof()){
@@ -179,34 +173,49 @@ void Aux::writeFIFO(uint16_t size, std::ifstream& file){
         // actually send command
         write(board->tty, gen, 255);
         cnt += 255;
-        // for(int i{0}; i<256; i++){    
-        //     write(board->tty, nop, 1);
-        // }
     }
-    // std::cout << "fin du chargement de la musique " << samplesInFIFO() << std::endl;
 }
 
+void Aux::play(const std::string& filename) {
+    if (musicThread.joinable()) {
+        stopMusic = true;
+        musicThread.join();  // Attendre la fin de l'ancien thread
+    }
+
+    stopMusic = false;  // Réinitialiser le flag d'arrêt
+
+    musicThread = std::thread([this, filename]() {
+        std::ifstream file(filename, std::ios::binary);
+        if (!file.is_open()) {
+            std::cout << "Erreur : Impossible d'ouvrir le fichier audio" << std::endl;
+            return;
+        }
+
+        writeFIFO(64000, file);
+        enable(true);
+
+        while (!file.eof() && !stopMusic) {
+            if (samplesInFIFO() <= 32000) {
+                writeFIFO(32000, file);
+            }
+        }
+
+        // Attente pour vider le FIFO
+        while (samplesInFIFO() > 0 && !stopMusic);
+
+        enable(false); // Désactivation du son à la fin
+    });
+}
+
+void Aux::stop() {
+    stopMusic = true;
+    if (musicThread.joinable()) {
+        musicThread.join();  // Attendre que le thread se termine
+    }
+}
 
 Aux& Aux::operator<<(const std::string& filename) {
-    std::ifstream file(filename, std::ios::binary);
-    // std::cout << "Je charge tkt" << std::endl;
-
-    if (!file.is_open()) {
-        std::cout << "Erreur : Impossible d'ouvrir le fichier audio" << std::endl;
-        // throw std::runtime_error("Erreur : Impossible d'ouvrir le fichier audio");
-    }
-
-    // std::cout << "Ca arrive tkt" << std::endl;
-    writeFIFO(64000, file);
-    enable(true);
-    while(!file.eof()){
-        // std::cout << "Le fic est vide ?" << std::endl;
-        if(samplesInFIFO() <= 32000){
-            writeFIFO(32000, file);
-        }
-    }
-    while(samplesInFIFO() > 0);
-    enable(false); // Désactivation du son à la fin
+    play(filename); // Appel à la méthode play() pour démarrer la musique
     return *this;
 }
 
