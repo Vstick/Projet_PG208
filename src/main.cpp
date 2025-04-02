@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cmath>
 #include <chrono>  // Pour std::chrono::milliseconds
 #include <thread>
 #include "mx3_board.hpp"   
@@ -31,6 +30,7 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
+// made with ChatGPT
 void wait(int milli){
     std::this_thread::sleep_for(std::chrono::milliseconds(milli));
 }
