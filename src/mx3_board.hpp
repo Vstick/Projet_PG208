@@ -14,7 +14,7 @@ class LCD;
 class Aux;
 class Bit;
 class Reg16;
-class 7seg;
+class aff7seg;
 class LEDs;
 
 ////////////////////////////////////////////////////// MX3board ///////////////////////////////////////////////////////
@@ -59,8 +59,7 @@ public:
         this->addr = add;
     }
 
-    Reg8() {}        //Constructeur sans argument
-    void init(MX3board* card, unsigned char add); 
+    Reg8(MX3board* card, unsigned char add);
 
     void operator=(unsigned char value);
     operator unsigned char() const;
@@ -70,6 +69,8 @@ public:
     Bit operator[](int a);      //Opérateur [] pour renvoyer un Bit
     Bit bit(int pos);      //Retourne un bit précis d'un registre
 };
+
+/////////////////////////////////////////////////////// LCD ////////////////////////////////////////////////////////////
 
 class LCD {
 private:
@@ -84,6 +85,8 @@ public:
     // Affichage du message sur le LCD via les registres
     void display(MX3board& board);
 };
+
+/////////////////////////////////////////////////////// AUX ///////////////////////////////////////////////////////////
 
 class Aux {
 private:
@@ -105,9 +108,9 @@ public:
     Aux& operator<<(const std::string& filename);
     Aux& operator<<(const char* filename);
 };
-    
 
 /////////////////////////////////////////////////////// Bit ///////////////////////////////////////////////////////////
+
 class Bit {
     private :
         Reg8& reg;               //registre souhaité
@@ -121,7 +124,7 @@ class Bit {
         ~Bit();             //Destructeur
 
         void operator=(int pos);    //modifie la valeur d'un bit
-        void operator bool() const;     //Renvoie un bit 
+        operator bool() const;     //Renvoie un bit 
 };
 
 //////////////////////////////////////////////////////// Reg16 ///////////////////////////////////////////////////////
@@ -135,31 +138,31 @@ class Reg16 {
         Reg16(Reg8& l, Reg8& m){        //Constructeur
             this -> lsb = l;
             this -> msb = m;
-        };
+        }
         ~Reg16();       //Destructeur
-
-        Reg16();       //Constructeur sans argument
 
         void operator=(unsigned short v16);       //Pour écrire un entier 16 bits (type short) dans un registre
         operator unsigned short() const;        //Pour lire un registre 16 bits
-}
+};
 
 //////////////////////////////////////////////////////// 7seg /////////////////////////////////////////////////////////
-class 7seg {
+
+class aff7seg {
     private :
         MX3board* brd;  // pour les registres pour décimal ou hexadécimal ou symbole
 
         int char2int(char data);    //fonction conversion 
     
     public :
-        7seg(MX3board* board) {
+        aff7seg(MX3board* board) {
             this -> brd = board;
         }
 
         void affich(int value, bool hex = false);       // Affiche un nombre entier décimal ou hexadécimal
-}
+};
 
 ///////////////////////////////////////////////////// LED /////////////////////////////////////////////////////////////
+
 class LEDs {
     private:
         MX3board* brd;
@@ -173,7 +176,7 @@ class LEDs {
         ~LEDs();
      
         void operator=(MX3board* sw);
-}
+};
     
 
 #endif // MX3BOARD_HPP

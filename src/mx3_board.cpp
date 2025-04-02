@@ -83,7 +83,7 @@ Reg8::operator unsigned char() const {
         printf("No answer from board\n");
         return 0;
     }
-    return gen[0];
+    return gen[2];
 }
 
 Reg16 Reg8::r16() {
