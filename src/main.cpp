@@ -7,8 +7,8 @@ int main(int argc, char *argv[]){
         printf("No device name provided\n");
         return -1;
     }
-
+    reg_led = 0x12;
     MX3board board {argv[1]};
-    
+
     return 0;
 }
