@@ -149,16 +149,15 @@ class Reg16 {
 
 class aff7seg {
     private :
-        MX3board* brd;  // pour les registres pour décimal ou hexadécimal ou symbole
-
-        int char2int(char data);    //fonction conversion 
+        MX3board* brd;  // pour les registres pour décimal ou hexadécimal ou symbole 
     
     public :
         aff7seg(MX3board* board) {
             this -> brd = board;
         }
 
-        void affich(int value, bool hex = false);       // Affiche un nombre entier décimal ou hexadécimal
+        int char2int(char data);    //fonction conversion caractère -> entier
+        void affich(int char2int(char data), bool hex = false);       // Affiche un nombre entier décimal ou hexadécimal
 };
 
 ///////////////////////////////////////////////////// LED /////////////////////////////////////////////////////////////
