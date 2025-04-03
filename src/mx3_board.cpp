@@ -29,11 +29,6 @@ Reg8 MX3board::operator[](unsigned char addr){
     return Reg8(this, addr);
 }
 
-// Write a value to an external register
-void MX3board::writeEXT(unsigned char addr, char value) {
-    (*this)[addr] = value;
-}
-
 // Overload operator<< to send a message to the LCD
 MX3board& MX3board::operator<<(const std::string& message) {
     lcd->writeLCD(message);                 // Write the message to the LCD
@@ -86,69 +81,68 @@ Reg8::operator unsigned char() const {
     return gen[2];
 }
 
-Reg16 Reg8::r16() {
-    return Reg16(*this, Reg8(board, addr + 1));  //Reg8 pointe sur l’adresse mémoire suivante
-}
-
-void init(MX3board* card, unsigned char add){
-    Reg8->board = card;
-    Reg8->addr = add;
-    return 0;
+Reg16 Reg8::r16() { 
+    return Reg16(this, new Reg8(board, addr + 1));  //Reg8 pointe sur l’adresse mémoire suivante
 }
 
 Bit Reg8::operator[](int a) {
-   return Bit(*this, a);
+   return Bit(this, a);
 }
 
 ////////////////////////////////////////////////////////// Bit ////////////////////////////////////////////////////////////
 void Bit::operator=(int pos){
-    unsigned char reg_bit = reg;  // Lire la valeur actuelle du registre
-    if (valeur)
+    unsigned char reg_bit = *reg;  // Lire la valeur actuelle du registre
+    if (reg_bit & (1 << pos))
         reg_bit |= (1 << bit_pos);        //Met le bit concerné à 1
     else
         reg_bit &= ~(1 << bit_pos);       //Met le bit concerné à 0
-    reg = t;
+    *reg = reg_bit; // Write the modified value back to the register
 }
 
-Bit Bit::operator bool(){
-    return (reg & (1 << bit_pos)) != 0;     //Renvoie la valeur du bit
+Bit::operator bool(){
+    return (*reg & (1 << bit_pos)) != 0;     //Renvoie la valeur du bit
 }
 
+Bit::~Bit(){}
 
 ////////////////////////////////////////////////////// Reg16 ////////////////////////////////////////////////////////////////
 void Reg16::operator=(unsigned short v16) {
-    lsb = (unsigned char)v16;     //Convertit en unsigned char
-    msb = (unsigned char)(v16 >> 8);     //On prend que les 8 bits de poids fort
+    *lsb = (unsigned char)v16;     // Assign the value to the register pointed to by lsb
+    *msb = (unsigned char)(v16 >> 8);     // Assign the value to the register pointed to by msb
 }
 
-void Reg16::operator unsigned short() {
-    return (unsigned short)(msb << 8) | lsb;       //Ou avec les bits de poids faible et de poids fort
+Reg16::operator unsigned short() {
+    return (unsigned short)((*msb << 8) | *lsb);       //Ou avec les bits de poids faible et de poids fort
 }
+
+Reg16::~Reg16(){}
 
 ////////////////////////////////////////////////////// 7seg //////////////////////////////////////////////////////////////////
-int 7seg::char2int(char data) {
+int aff7seg::char2int(char data) {
     int b = data + 0;
     return b;
 }
 
 // Affichage d'un nombre entier
-void 7seg::affich(int char2int(char data), bool hex) {
-    int value = char2int(char data);
+void aff7seg::affich(char data, bool hex) {
+    int value = char2int(data);
     if (hex) {
-        brd[MX3ADDR_7SEG_HEX_L] = (unsigned char)(value & 0xFF);
-        brd[MX3ADDR_7SEG_HEX_H] = (unsigned char)((value >> 8) & 0xFF);
+        (*brd)[MX3ADDR_7SEG_HEX_L] = (unsigned char)(value & 0xFF);
+        (*brd)[MX3ADDR_7SEG_HEX_H] = (unsigned char)((value >> 8) & 0xFF);
     } else {
-        brd[MX3ADDR_7SEG_DEC_L] = (unsigned char)(value & 0xFF);
-        brd[MX3ADDR_7SEG_DEC_H] = (unsigned char)((value >> 8) & 0xFF);
+        (*brd)[MX3ADDR_7SEG_DEC_L] = (unsigned char)(value & 0xFF);
+        (*brd)[MX3ADDR_7SEG_DEC_H] = (unsigned char)((value >> 8) & 0xFF);
     }
 }
  
-
+aff7seg::~aff7seg(){}
 
 /////////////////////////////////////////////////////////// LEDs ////////////////////////////////////////////////////////////////
 void LEDs::operator=(MX3board* sw) {
     brd[MX3ADDR_LED] = sw[MX3ADDR_SW];  //écrit la valeur du switch sur le registre LED
 }
+
+LEDs::~LEDs(){}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// LCD ////////////////////////////////////////////////////////////////////////////////
@@ -159,6 +153,8 @@ LCD::LCD() {
     std::fill(std::begin(line1), std::end(line1), ' '); // Initialize line1 with spaces
     std::fill(std::begin(line2), std::end(line2), ' '); // Initialize line2 with spaces
 }
+
+LCD::~LCD() {}
 
 // Write a message to the LCD buffer
 void LCD::writeLCD(const std::string& message) {
